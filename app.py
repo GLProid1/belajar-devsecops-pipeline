@@ -2,6 +2,7 @@
 
 import sqlite3
 import datetime
+from zoneinfo import ZoneInfo
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
@@ -57,7 +58,8 @@ def version():
 @app.route("/time", methods=["GET"])
 def time():
     """Menampilkan waktu server saat ini."""
-    return {"server_time": datetime.datetime.now().isoformat()}
+    now = datetime.datetime.now(ZoneInfo("Asia/Jakarta"))
+    return {"server_time": now.isoformat()}
 
 if __name__ == "__main__":
     init_db()
