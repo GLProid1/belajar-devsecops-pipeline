@@ -1,6 +1,7 @@
 """Modul backend autentikasi Flask dengan antarmuka web interaktif."""
 
 import sqlite3
+import datetime
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
@@ -47,6 +48,16 @@ def index():
     return render_template(
         "index.html", message=message, status_class=status_class
     )
+
+@app.route("/version", methods=["GET"])
+def version():
+    """Endpoint untuk menampilkan versi aplikasi."""
+    return {"app": "Flask DevSecOps Pipeline", "version": "1.1.0"}
+
+@app.route("/time", methods=["GET"])
+def time():
+    """Menampilkan waktu server saat ini."""
+    return {"server_time": datetime.datetime.now().isoformat()}
 
 if __name__ == "__main__":
     init_db()
