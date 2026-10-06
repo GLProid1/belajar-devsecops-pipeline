@@ -13,7 +13,7 @@ def init_db():
         "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL)"
     )
     cursor.execute(
-        "INSERT INTO users (username, password) VALUES ('admin', 'supersecret')"
+        "INSERT OR IGNORE INTO users VALUES ('admin', 'supersecret')"
     )
     conn.commit()
     conn.close()
