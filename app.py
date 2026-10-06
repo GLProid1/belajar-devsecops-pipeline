@@ -1,5 +1,6 @@
 """Modul backend autentikasi Flask dengan antarmuka web interaktif."""
 
+import os
 import sqlite3
 from flask import Flask, request, render_template
 
@@ -12,8 +13,14 @@ def init_db():
     cursor.execute(
         "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL)"
     )
+    admin_password = os.getenv("ADMIN_PASSWORD")
+
+    if not admin_password:
+        raise RuntimeError("ADMIN_PASSWORD belum dikonfigurasi")
+
     cursor.execute(
-        "INSERT OR IGNORE INTO users VALUES ('admin', 'supersecret')"
+        "INSERT OR IGNORE INTO users VALUES (?, ?)",
+        ("admin", admin_password)
     )
     conn.commit()
     conn.close()
@@ -45,7 +52,9 @@ def index():
             status_class = "error"
 
     return render_template(
-        'index.html', message=message, status_class=status_class
+        'index.html',
+        message=message,
+        status_class=status_class
     )
 
 if __name__ == '__main__':
