@@ -97,7 +97,7 @@ jobs:
   # ==========================================
   image-scan:
     name: Container Image Vulnerabiity Scan
-    runs-on: ubuntu-latess
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
