@@ -7,7 +7,7 @@ on:
     branches: ["main", "master"]
   workflow_dispatch: {}
 
-# Hak akses minimal untuk GITHUB_TOKEN (prinsip least privilege)
+# Hak akses minimal untuk GITHUB_TOKEN (prinsip least_privilege)
 permissions:
   contents: read
 
@@ -65,7 +65,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ambil seluruh riwayat commit untuk analisis Gitleaks
+          fetch-depth: 0 # Ambil seluruh riwayat commit untuk analisis Gitleaks
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
