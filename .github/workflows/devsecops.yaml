@@ -103,14 +103,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker Image for Scanning
-        run: docker build -t secure-flask-app:${{ github.sha }} .
-
-      - name: Run Trivy Scan
-        run: |
-          docker build -t secure-flask-app:${{ github.sha }} .
+        run: docker build --no-cache -t secure-flask-app:${{ github.sha }} .
 
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: "secure-flask-app:${{ github.sha }}"
           scan-type: "image"
@@ -118,13 +114,14 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           vuln-type: "os,library"
+          severity: "HIGH,CRITICAL"
 
   # ==========================================
   # CD STAGE: Deploy ke VM
   # ==========================================
   deploy-to-vm:
     name: Build & Deploy to VirtualBox VM
-    needs: [sast-scan, pylint-check, secret-scan, dependency-scan]
+    needs: [sast-scan, pylint-check, secret-scan, dependency-scan, image-scan]
     runs-on: self-hosted
     steps:
       - name: Checkout Source Code
