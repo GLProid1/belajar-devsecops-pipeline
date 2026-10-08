@@ -95,29 +95,29 @@ jobs:
   # ==========================================
   # CI JOB 5: Container Image Scan (Trivy)
   # ==========================================
-  # image-scan:
-  #   name: Container Image Vulnerabiity Scan
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout Source Code
-  #       uses: actions/checkout@v4
+  image-scan:
+    name: Container Image Vulnerabiity Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
-  #     - name: Build Docker Image for Scanning
-  #       run: docker build -t secure-flask-app:${{ github.sha }} .
+      - name: Build Docker Image for Scanning
+        run: docker build -t secure-flask-app:${{ github.sha }} .
 
-  #     - name: Run Trivy Scan
-  #       run: |
-  #         docker build -t secure-flask-app:${{ github.sha }} .
+      - name: Run Trivy Scan
+        run: |
+          docker build -t secure-flask-app:${{ github.sha }} .
 
-  #     - name: Run Trivy Vulnerability Scanner
-  #       uses: aquasecurity/trivy-action@master
-  #       with:
-  #         image-ref: 'secure-flask-app:${{ github.sha }}'
-  #         scan-type: 'image'
-  #         format: 'table'
-  #         exit-code: '1'
-  #         ignore-unfixed: true
-  #         vuln-type: 'os,library'
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "secure-flask-app:${{ github.sha }}"
+          scan-type: "image"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
 
   # ==========================================
   # CD STAGE: Deploy ke VM
