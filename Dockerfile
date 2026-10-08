@@ -2,21 +2,19 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
+# Menjalankan container sebagai user non-root user untuk keamanana
 RUN useradd -m appuser
 
 # Upgrade build tools prior to installing app requirements
-RUN python -m pip install --no-cache-dir --upgrade pip setuptools>=78.1.1 wheel>=0.46.2
-
+RUN python -m pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
 
 # Install dependencies directly from the updated requirements file
-RUN python -m pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir \
+    --upgrade-strategy eager \
+    -r requirements.txt
 
 COPY . .
-
-# Remove the manifest inside the image if not needed at runtime
-RUN rm -f requirements.txt
-
 RUN chown -R appuser:appuser /app
 
 USER appuser
