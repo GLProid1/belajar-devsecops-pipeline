@@ -7,6 +7,10 @@ on:
     branches: ["main", "master"]
   workflow_dispatch: {}
 
+# Hak akses minimal untuk GITHUB_TOKEN (prinsip least_privilege)
+permissions:
+  contents: read
+
 jobs:
   # ==========================================
   # CI JOB 1: SAST Scan (Semgrep)
@@ -37,7 +41,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
       - name: Install Dependencies
         run: |
@@ -49,11 +53,75 @@ jobs:
         run: pylint --fail-under=9.0 app.py
 
   # ==========================================
+  # CI JOB 3: Secret Scan (Gitleaks)
+  # ==========================================
+  secret-scan:
+    name: Gitleaks Secret Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ambil seluruh riwayat commit untuk analisis Gitleaks
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+
+  # ==========================================
+  # CI JOB 4: Dependency Scan (pip-audit)
+  # ==========================================
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Run pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+          pip-audit -r requirements.txt
+
+  # ==========================================
+  # CI JOB 5: Container Image Scan (Trivy)
+  # ==========================================
+  image-scan:
+    name: Container Image Vulnerabiity Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image for Scanning
+        run: docker build --no-cache -t secure-flask-app:${{ github.sha }} .
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: "secure-flask-app:${{ github.sha }}"
+          scan-type: "image"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "HIGH,CRITICAL"
+
+  # ==========================================
   # CD STAGE: Deploy ke VM
   # ==========================================
   deploy-to-vm:
     name: Build & Deploy to VirtualBox VM
-    needs: [sast-scan, pylint-check]
+    needs: [sast-scan, pylint-check, secret-scan, dependency-scan, image-scan]
     runs-on: self-hosted
     steps:
       - name: Checkout Source Code

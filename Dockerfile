@@ -1,12 +1,18 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
-# Menjalankan container dengan non-root user demi keamanan runtime
+# Menjalankan container sebagai user non-root user untuk keamanana
 RUN useradd -m appuser
 
+# Upgrade build tools prior to installing app requirements
+RUN python -m pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Install dependencies directly from the updated requirements file
+RUN python -m pip install --no-cache-dir \
+    --upgrade-strategy eager \
+    -r requirements.txt
 
 COPY . .
 RUN chown -R appuser:appuser /app
